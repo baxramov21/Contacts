@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     Contact currentContact;
     ContactsAdapter adapter;
 
-    private final ArrayList<Contact> contacts = new ArrayList<>();
+    public static final ArrayList<Contact> contacts = new ArrayList<>();
     private ContactsDBHelper dbHelper;
     private  SQLiteDatabase sqLiteDatabase;
 
@@ -45,6 +45,18 @@ public class MainActivity extends AppCompatActivity {
         getData();
         adapter = new ContactsAdapter(this, contacts);
         contactsListView.setAdapter(adapter);
+
+        contactsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent intentToContactInfo = new Intent(MainActivity.this,ContactInfo.class);
+                Contact clickedContact = contacts.get(i);
+                intentToContactInfo.putExtra("contact_name",clickedContact.getContactName());
+                intentToContactInfo.putExtra("contact_number", clickedContact.getContactNumber());
+                intentToContactInfo.putExtra("position",clickedContact.getId());
+                startActivity(intentToContactInfo);
+            }
+        });
         contactsListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {

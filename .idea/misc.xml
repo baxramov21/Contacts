@@ -4,7 +4,8 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/barsa/AndroidStudioProjects/Contacts/app/src/main/res/drawable/button_shape.xml" value="0.2265" />
-        <entry key="..\:/Users/barsa/AndroidStudioProjects/Contacts/app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="..\:/Users/barsa/AndroidStudioProjects/Contacts/app/src/main/res/drawable/contact_info_buttons_shape.xml" value="0.2265" />
+        <entry key="..\:/Users/barsa/AndroidStudioProjects/Contacts/app/src/main/res/layout/activity_main.xml" value="0.264" />
         <entry key="..\:/Users/barsa/AndroidStudioProjects/Contacts/app/src/main/res/layout/activity_new_contact.xml" value="0.2" />
         <entry key="..\:/Users/barsa/AndroidStudioProjects/Contacts/app/src/main/res/layout/contact_info.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/barsa/AndroidStudioProjects/Contacts/app/src/main/res/layout/contact_item.xml" value="0.264" />
