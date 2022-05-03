@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Contacts</string>
+    <string name="create_new_contact">Create new contact</string>
+    <string name="save_contact">Save contact</string>
+    <string name="name">Name</string>
+    <string name="e_mail">E-mail</string>
+    <string name="phone_number">Phone number</string>
+    <string name="fill_fields">Please fill the fields</string>
+</resources>
