@@ -3,32 +3,34 @@ package com.example.contacts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.ContentValues;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private ListView contactsListView;
+    private ContactsAdapter adapter;
+    private MainViewModel viewModel;
 
-    Contact currentContact;
-    ContactsAdapter adapter;
+    public static final String TAG = MainActivity.class.getName();
 
-    public static final ArrayList<Contact> contacts = new ArrayList<>();
-    private ContactsDBHelper dbHelper;
-    private  SQLiteDatabase sqLiteDatabase;
+    public static ArrayList<Contact> contacts = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,21 +41,21 @@ public class MainActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.hide();
         }
+
+        viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         contactsListView = findViewById(R.id.rv_contacts_list);
-        dbHelper = new ContactsDBHelper(this);
-        sqLiteDatabase = dbHelper.getWritableDatabase();
         getData();
         adapter = new ContactsAdapter(this, contacts);
         contactsListView.setAdapter(adapter);
-
         contactsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent intentToContactInfo = new Intent(MainActivity.this,ContactInfo.class);
+                Intent intentToContactInfo = new Intent(MainActivity.this, ContactInfo.class);
                 Contact clickedContact = contacts.get(i);
-                intentToContactInfo.putExtra("contact_name",clickedContact.getContactName());
+                intentToContactInfo.putExtra("contact_name", clickedContact.getContactName());
                 intentToContactInfo.putExtra("contact_number", clickedContact.getContactNumber());
-                intentToContactInfo.putExtra("position",clickedContact.getId());
+                intentToContactInfo.putExtra("position", clickedContact.getId());
                 startActivity(intentToContactInfo);
             }
         });
@@ -65,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
                 return false;
@@ -85,28 +87,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void remove(int position) {
-        int id = contacts.get(position).getId();
-        String where = ContactsContract.ContactsEntries._ID + " = ?";
-        String[] whereArgs = new String[]{Integer.toString(id)};
-        sqLiteDatabase.delete(ContactsContract.ContactsEntries.COLUMNS_CONTACT_TABLE_NAME , where , whereArgs);
-        getData();
-        adapter.notifyDataSetChanged();
+        Contact contact = contacts.get(position);
+        viewModel.deleteContact(contact);
     }
 
     private void getData() {
-        contacts.clear();
-        String selection = ContactsContract.ContactsEntries.COLUMNS_CONTACT_NAME + " = ?";
-        String[] selectionArgs = new String[]{"Shixnazar"};
-        Cursor cursor = sqLiteDatabase.query(ContactsContract.ContactsEntries.COLUMNS_CONTACT_TABLE_NAME, null, null, null, null, null, ContactsContract.ContactsEntries.COLUMNS_CONTACT_NAME);
-        while (cursor.moveToNext()) {
-            int id = cursor.getInt(cursor.getColumnIndexOrThrow(ContactsContract.ContactsEntries._ID));
-            String name = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.ContactsEntries.COLUMNS_CONTACT_NAME));
-            String number = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.ContactsEntries.COLUMNS_CONTACT_NUMBER));
-            Contact contact = new Contact(id,name, number);
-            contacts.add(contact);
-        }
-        cursor.close();
+        LiveData<List<Contact>> contactsFromDB = viewModel.getAllContacts();
+        contactsFromDB.observe((LifecycleOwner) this, new Observer<List<Contact>>() {
+            @Override
+            public void onChanged(List<Contact> contactsFromLiveData) {
+                contacts.clear();
+                contacts.addAll(contactsFromLiveData);
+                adapter.notifyDataSetChanged();
+            }
+        });
     }
-
-
 }
